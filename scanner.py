@@ -81,6 +81,7 @@ class Scanner:
         self.reset_scanner()
         self.first_time = False
         self.yaml_version = None  # type: Any
+        self.comments = None # type: Any
 
     @property
     def flow_level(self):
@@ -140,6 +141,8 @@ class Scanner:
         # A simple key may start with ALIAS, ANCHOR, TAG, SCALAR(flow),
         # '[', or '{' tokens.
         self.possible_simple_keys = {}  # type: Dict[Any, Any]
+        # comments persist on self.loader.parsed_comments
+        self.comments = None
 
     @property
     def reader(self):
