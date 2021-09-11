@@ -1,0 +1,3 @@
+python-ruamel-yaml source: no-debian-changes
+python-ruamel-yaml source: source-contains-prebuilt-windows-binary
+python-ruamel-yaml source: source-package-encodes-python-version
