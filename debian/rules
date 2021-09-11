@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+
+SHELL := /bin/bash
+
+override_dh_auto_build:
+	python3 setup.py build
+
+override_dh_auto_install:
+	python3 setup.py install --single-version-externally-managed --skip-build --root=debian/python3-ruamel.yaml --prefix=/usr
+	find debian/python3-ruamel.yaml/usr/lib/python*/*-packages -type f -name '*.pyc' -exec rm -rf {} \;
+	fdupes -s debian/python3-ruamel.yaml/usr/lib/python*/*-packages
+
+override_dh_auto_test:
+
+override_dh_auto_clean:
+
+%:
+	dh $@ --buildsystem=pybuild --with python3

@@ -1,0 +1,4 @@
+python3-ruamel.yaml: copyright-without-copyright-notice
+python3-ruamel.yaml: initial-upload-closes-no-bugs
+python3-ruamel.yaml: no-manual-page
+python3-ruamel.yaml: zero-byte-file-in-doc-directory
