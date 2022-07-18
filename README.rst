@@ -4,8 +4,8 @@ ruamel.yaml
 
 ``ruamel.yaml`` is a YAML 1.2 loader/dumper package for Python.
 
-:version:       0.17.17
-:updated:       2021-10-31
+:version:       0.17.19
+:updated:       2021-12-26
 :documentation: http://yaml.readthedocs.io
 :repository:    https://sourceforge.net/projects/ruamel-yaml/
 :pypi:          https://pypi.org/project/ruamel.yaml/
@@ -71,6 +71,15 @@ ChangeLog
 =========
 
 .. should insert NEXT: at the beginning of line for next key (with empty line)
+
+0.17.19 (2021-12-26):
+  - fix mypy problems (reported by `Arun <https://sourceforge.net/u/arunppsg/profile/>`__)
+
+0.17.18 (2021-12-24):
+  - copy-paste error in folded scalar comment attachment (reported by `Stephan Geulette
+    <https://sourceforge.net/u/sgeulette/profile/>`__)
+  - fix 411, indent error comment between key empty seq value (reported by `Guillermo Julián
+    <https://sourceforge.net/u/gjulianm/profile/>`__)
 
 0.17.17 (2021-10-31):
   - extract timestamp matching/creation to util
