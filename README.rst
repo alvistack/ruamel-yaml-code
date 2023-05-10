@@ -4,37 +4,26 @@ ruamel.yaml
 
 ``ruamel.yaml`` is a YAML 1.2 loader/dumper package for Python.
 
-:version:       0.17.17
-:updated:       2021-10-31
+:version:       0.17.26
+:updated:       2023-05-09
 :documentation: http://yaml.readthedocs.io
 :repository:    https://sourceforge.net/projects/ruamel-yaml/
 :pypi:          https://pypi.org/project/ruamel.yaml/
 
-*The 0.16.13 release was the last that was tested to be working on Python 2.7.
-The 0.17 series will still be tested on Python 3.5, but the 0.18 will not. The
-0.17 series will also stop support for the old PyYAML functions, so a `YAML()` instance
-will need to be created.*
+*Starting with 0.17.22 only Python 3.7+ is supported.
+The 0.17 series is also the last to support old PyYAML functions, replace it by 
+creating a `YAML()` instance and use its `.load()` and `.dump()` methods.*
+New(er) functionality is usually only available via the new API.
 
-*The 0.17 series will also see changes in how comments are attached during
-roundtrip. This will result in backwards incompatibilities on the `.ca` data and
-it might even be necessary for documented methods that handle comments.*
+The 0.17.21 was the last one tested to be working on Python 3.5 and 3.6 (the
+latter was not tested, because 
+tox/virtualenv stopped supporting that EOL version).
+The 0.16.13 release was the last that was tested to be working on Python 2.7.
 
-*Please adjust your dependencies accordingly if necessary. (`ruamel.yaml<0.17`)*
+*Please adjust/pin your dependencies accordingly if necessary. (`ruamel.yaml<0.18`)*
 
-
-Starting with version 0.15.0 the way YAML files are loaded and dumped
-has been changing, see the API doc for details.  Currently existing
-functionality will throw a warning before being changed/removed.
-**For production systems already using a pre 0.16 version, you should
-pin the version being used with ``ruamel.yaml<=0.15``** if you cannot
-fully test upgrading to a newer version. For new usage
-pin to the minor version tested ( ``ruamel.yaml<=0.17``) or even to the
-exact version used. 
-
-New functionality is usually only available via the new API, so
-make sure you use it and stop using the `ruamel.yaml.safe_load()`,
-`ruamel.yaml.round_trip_load()` and `ruamel.yaml.load()` functions
-(and their `....dump()` counterparts).
+There are now two extra plug-in packages (`ruamel.yaml.bytes` and `ruamel.yaml.string`)
+for those not wanting to do the streaming to a `io.BytesIO/StringIO` buffer themselves.
 
 If your package uses ``ruamel.yaml`` and is not listed on PyPI, drop
 me an email, preferably with some information on how you use the
@@ -71,6 +60,81 @@ ChangeLog
 =========
 
 .. should insert NEXT: at the beginning of line for next key (with empty line)
+
+0.17.26 (2023-05-09):
+  - Fix for error on edge cage for issue 459
+
+0.17.25 (2023-05-09):
+  - fix for regression while dumping wrapped strings with too many backslashes removed
+    (issue 459, reported by `Lele Gaifax <https://sourceforge.net/u/lele/profile/>`__)
+
+0.17.24 (2023-05-06):
+  - rewrite of ``CommentedMap.insert()``. If you have a merge key in
+    the YAML document for the mapping you insert to, the position value should 
+    be the one as you look at the YAML input.
+    This fixes issue 453 where other
+    keys of a merged in mapping would show up after an insert (reported by
+    `Alex Miller <https://sourceforge.net/u/millerdevel/profile/>`__). It
+    also fixes a call to `.insert()` resulting into the merge key to move
+    to be the first key if it wasn't already and it is also now possible
+    to insert a key before a merge key (even if the fist key in the mapping).
+  - fix (in the pure Python implementation including default) for issue 447.
+    (reported by `Jack Cherng <https://sourceforge.net/u/jfcherng/profile/>`__, 
+    also brought up by brent on 
+    `StackOverflow <https://stackoverflow.com/q/40072485/1307905>`__)
+
+0.17.23 (2023-05-05):
+  - fix 458, error on plain scalars starting with word longer than width.
+    (reported by `Kyle Larose <https://sourceforge.net/u/klarose/profile/>`__)
+  - fix for ``.update()`` no longer correctly handling keyword arguments
+    (reported by John Lin on <StackOverflow 
+    `<https://stackoverflow.com/q/76089100/1307905>`__)
+  - fix issue 454: high Unicode (emojis) in quoted strings always
+    escaped (reported by `Michal Čihař <https://sourceforge.net/u/nijel/profile/>`__
+    based on a question on StackOverflow).
+  - fix issue with emitter conservatively inserting extra backslashes in wrapped
+    quoted strings (reported by thebenman on `StackOverflow 
+    <https://stackoverflow.com/q/75631454/1307905>`__)
+
+0.17.22 (2023-05-02):
+
+  - fix issue 449 where the second exclamation marks got URL encoded (reported
+    and fixing PR provided by `John Stark <https://sourceforge.net/u/jods/profile/>`__)
+  - fix issue with indent != 2 and literal scalars with empty first line
+    (reported by wrdis on `StackOverflow <https://stackoverflow.com/q/75584262/1307905>`__)
+  - updated __repr__ of CommentedMap, now that Python's dict is ordered -> no more 
+    ordereddict(list-of-tuples)
+  - merge MR 4, handling OctalInt in YAML 1.1 
+    (provided by `Jacob Floyd <https://sourceforge.net/u/cognifloyd/profile/>`_)
+  - fix loading of `!!float 42` (reported by Eric on
+    `Stack overflow <https://stackoverflow.com/a/71555107/1307905>`_)
+  - line numbers are now set on `CommentedKeySeq` and `CommentedKeyMap` (which
+    are created if you have a sequence resp. mapping as the key in a mapping)
+  - plain scalars: put single words longer than width on a line of their own, instead
+    of after the previous line (issue 427, reported by `Antoine Cotten 
+    <https://sourceforge.net/u/antoineco/profile/>`_). Caveat: this currently results in a 
+    space ending the previous line.
+  - fix for folded scalar part of 421: comments after ">" on first line of folded
+    scalars are now preserved (as were those in the same position on literal scalars).
+    Issue reported by Jacob Floyd.
+  - added stacklevel to warnings
+  - typing changed from Py2 compatible comments to Py3, removed various Py2-isms
+
+0.17.21 (2022-02-12):
+  - fix bug in calling `.compose()` method with `pathlib.Path` instance.
+
+0.17.20 (2022-01-03):
+  - fix error in microseconds while rounding datetime fractions >= 9999995
+    (reported by `Luis Ferreira <https://sourceforge.net/u/ljmf00/>`__)
+
+0.17.19 (2021-12-26):
+  - fix mypy problems (reported by `Arun <https://sourceforge.net/u/arunppsg/profile/>`__)
+
+0.17.18 (2021-12-24):
+  - copy-paste error in folded scalar comment attachment (reported by `Stephan Geulette
+    <https://sourceforge.net/u/sgeulette/profile/>`__)
+  - fix 411, indent error comment between key empty seq value (reported by `Guillermo Julián
+    <https://sourceforge.net/u/gjulianm/profile/>`__)
 
 0.17.17 (2021-10-31):
   - extract timestamp matching/creation to util
