@@ -1,25 +1,23 @@
 # coding: utf-8
 
-from ruamel.yaml.compat import _F
-
 # Abstract classes.
 
-if False:  # MYPY
-    from typing import Any, Dict, Optional, List  # NOQA
+from typing import Any, Dict, Optional, List  # NOQA
 
 SHOW_LINES = False
 
 
-def CommentCheck():
-    # type: () -> None
+def CommentCheck() -> None:
     pass
 
 
 class Event:
     __slots__ = 'start_mark', 'end_mark', 'comment'
+    crepr = 'Unspecified Event'
 
-    def __init__(self, start_mark=None, end_mark=None, comment=CommentCheck):
-        # type: (Any, Any, Any) -> None
+    def __init__(
+        self, start_mark: Any = None, end_mark: Any = None, comment: Any = CommentCheck
+    ) -> None:
         self.start_mark = start_mark
         self.end_mark = end_mark
         # assert comment is not CommentCheck
@@ -27,29 +25,24 @@ class Event:
             comment = None
         self.comment = comment
 
-    def __repr__(self):
-        # type: () -> Any
+    def __repr__(self) -> Any:
         if True:
             arguments = []
             if hasattr(self, 'value'):
                 # if you use repr(getattr(self, 'value')) then flake8 complains about
                 # abuse of getattr with a constant. When you change to self.value
                 # then mypy throws an error
-                arguments.append(repr(self.value))  # type: ignore
+                arguments.append(repr(self.value))
             for key in ['anchor', 'tag', 'implicit', 'flow_style', 'style']:
                 v = getattr(self, key, None)
                 if v is not None:
-                    arguments.append(_F('{key!s}={v!r}', key=key, v=v))
+                    arguments.append(f'{key!s}={v!r}')
             if self.comment not in [None, CommentCheck]:
-                arguments.append('comment={!r}'.format(self.comment))
+                arguments.append(f'comment={self.comment!r}')
             if SHOW_LINES:
                 arguments.append(
-                    '({}:{}/{}:{})'.format(
-                        self.start_mark.line,
-                        self.start_mark.column,
-                        self.end_mark.line,
-                        self.end_mark.column,
-                    )
+                    f'({self.start_mark.line}:{self.start_mark.column}/'
+                    f'{self.end_mark.line}:{self.end_mark.column})'
                 )
             arguments = ', '.join(arguments)  # type: ignore
         else:
@@ -58,23 +51,21 @@ class Event:
                 for key in ['anchor', 'tag', 'implicit', 'value', 'flow_style', 'style']
                 if hasattr(self, key)
             ]
-            arguments = ', '.join(
-                [_F('{k!s}={attr!r}', k=key, attr=getattr(self, key)) for key in attributes]
-            )
+            arguments = ', '.join([f'{key!s}={getattr(self, key)!r}' for key in attributes])
             if self.comment not in [None, CommentCheck]:
-                arguments += ', comment={!r}'.format(self.comment)
-        return _F(
-            '{self_class_name!s}({arguments!s})',
-            self_class_name=self.__class__.__name__,
-            arguments=arguments,
-        )
+                arguments += f', comment={self.comment!r}'
+        return f'{self.__class__.__name__!s}({arguments!s})'
+
+    def compact_repr(self) -> Any:
+        return f'{self.crepr}'
 
 
 class NodeEvent(Event):
     __slots__ = ('anchor',)
 
-    def __init__(self, anchor, start_mark=None, end_mark=None, comment=None):
-        # type: (Any, Any, Any, Any) -> None
+    def __init__(
+        self, anchor: Any, start_mark: Any = None, end_mark: Any = None, comment: Any = None
+    ) -> None:
         Event.__init__(self, start_mark, end_mark, comment)
         self.anchor = anchor
 
@@ -84,16 +75,15 @@ class CollectionStartEvent(NodeEvent):
 
     def __init__(
         self,
-        anchor,
-        tag,
-        implicit,
-        start_mark=None,
-        end_mark=None,
-        flow_style=None,
-        comment=None,
-        nr_items=None,
-    ):
-        # type: (Any, Any, Any, Any, Any, Any, Any, Optional[int]) -> None
+        anchor: Any,
+        tag: Any,
+        implicit: Any,
+        start_mark: Any = None,
+        end_mark: Any = None,
+        flow_style: Any = None,
+        comment: Any = None,
+        nr_items: Optional[int] = None,
+    ) -> None:
         NodeEvent.__init__(self, anchor, start_mark, end_mark, comment)
         self.tag = tag
         self.implicit = implicit
@@ -110,30 +100,37 @@ class CollectionEndEvent(Event):
 
 class StreamStartEvent(Event):
     __slots__ = ('encoding',)
+    crepr = '+STR'
 
-    def __init__(self, start_mark=None, end_mark=None, encoding=None, comment=None):
-        # type: (Any, Any, Any, Any) -> None
+    def __init__(
+        self,
+        start_mark: Any = None,
+        end_mark: Any = None,
+        encoding: Any = None,
+        comment: Any = None,
+    ) -> None:
         Event.__init__(self, start_mark, end_mark, comment)
         self.encoding = encoding
 
 
 class StreamEndEvent(Event):
     __slots__ = ()
+    crepr = '-STR'
 
 
 class DocumentStartEvent(Event):
     __slots__ = 'explicit', 'version', 'tags'
+    crepr = '+DOC'
 
     def __init__(
         self,
-        start_mark=None,
-        end_mark=None,
-        explicit=None,
-        version=None,
-        tags=None,
-        comment=None,
-    ):
-        # type: (Any, Any, Any, Any, Any, Any) -> None
+        start_mark: Any = None,
+        end_mark: Any = None,
+        explicit: Any = None,
+        version: Any = None,
+        tags: Any = None,
+        comment: Any = None,
+    ) -> None:
         Event.__init__(self, start_mark, end_mark, comment)
         self.explicit = explicit
         self.version = version
@@ -142,9 +139,15 @@ class DocumentStartEvent(Event):
 
 class DocumentEndEvent(Event):
     __slots__ = ('explicit',)
+    crepr = '-DOC'
 
-    def __init__(self, start_mark=None, end_mark=None, explicit=None, comment=None):
-        # type: (Any, Any, Any, Any) -> None
+    def __init__(
+        self,
+        start_mark: Any = None,
+        end_mark: Any = None,
+        explicit: Any = None,
+        comment: Any = None,
+    ) -> None:
         Event.__init__(self, start_mark, end_mark, comment)
         self.explicit = explicit
 
@@ -152,32 +155,41 @@ class DocumentEndEvent(Event):
 class AliasEvent(NodeEvent):
     __slots__ = 'style'
 
-    def __init__(self, anchor, start_mark=None, end_mark=None, style=None, comment=None):
-        # type: (Any, Any, Any, Any, Any) -> None
+    def __init__(
+        self,
+        anchor: Any,
+        start_mark: Any = None,
+        end_mark: Any = None,
+        style: Any = None,
+        comment: Any = None,
+    ) -> None:
         NodeEvent.__init__(self, anchor, start_mark, end_mark, comment)
         self.style = style
 
 
 class ScalarEvent(NodeEvent):
     __slots__ = 'tag', 'implicit', 'value', 'style'
+    crepr = '=VAL'
 
     def __init__(
         self,
-        anchor,
-        tag,
-        implicit,
-        value,
-        start_mark=None,
-        end_mark=None,
-        style=None,
-        comment=None,
-    ):
-        # type: (Any, Any, Any, Any, Any, Any, Any, Any) -> None
+        anchor: Any,
+        tag: Any,
+        implicit: Any,
+        value: Any,
+        start_mark: Any = None,
+        end_mark: Any = None,
+        style: Any = None,
+        comment: Any = None,
+    ) -> None:
         NodeEvent.__init__(self, anchor, start_mark, end_mark, comment)
         self.tag = tag
         self.implicit = implicit
         self.value = value
         self.style = style
+
+    def compact_repr(self) -> Any:
+        return f'{self.crepr} :{self.value}'
 
 
 class SequenceStartEvent(CollectionStartEvent):
