@@ -1,0 +1,9 @@
+*.egg-info
+.hg
+.hgtags
+.pybuild
+.ruamel
+TODO
+_ruamel_yaml.c
+build
+tmp
