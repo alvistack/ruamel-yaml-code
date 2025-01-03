@@ -1,0 +1,12 @@
+*.egg-info
+*.py_alt
+.hg
+.hgtags
+.pybuild
+.ruamel
+TODO.rst
+_doc/*.pdf
+_doc/*.rst
+build
+try_*
+venv
