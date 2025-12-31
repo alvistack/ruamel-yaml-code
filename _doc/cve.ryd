@@ -1,0 +1,101 @@
+version: 0.2
+text: smd
+pdf: false
+--- |
+
+# Processing unchecked input.
+
+Processing unchecked input is inherently dangerous,
+regardless of whether you using `ruamel.yaml` to load that input,
+or use Python, or a program in any other language, to process such input.
+
+E.g. if the size of the input exceeds the (virtual) memory
+that is available to a program that tries to read all
+of the input into memory. The program is likely going to
+exit with an error, or require processing of an exception.
+
+Loading unchecked data into `ruamel.yaml` can **potentially** be exploited
+both in time and space.
+Due to the YAML definition,
+the phased processing of input,
+and the overhead of constructing,
+it is possible to cause recursion depth overflow,
+long processing times,
+and/or out of memory situations.
+
+If you use `ruamel.yaml` in round-trip mode (the default),
+there will be no unknown code executed,
+like there used to be in old PyYAML default `load()`.
+The round-trip loader is subclassed from the safe loader.
+
+`ruamel.yaml` has different loader modes,
+and if you use `yaml = YAML(typ='unsafe')`,
+this is, as you may guess, unsafe to run on unchecked input.
+
+### how to check your automate checking your input
+
+If you have an unknown file,
+which is supposed to contain one or more YAML document,
+you probably look at its size and possible use `wc` and
+`more`/`less` to look at the content,
+before loading it into your editor (especially if your editor starts
+swapping and becomes unresponsive).
+
+If you need to process unchecked input,
+apply the same principles,
+taking into account what is not normal for your application:
+
+- check the file size and reject overly large files.
+  A config file, for the ten configurable options, is unlikely to be
+  more than a few kilobyte in size.
+- load the file and
+  - check if the first non-space character is `[` or `{`.
+    Complain if appropriate that a (readable) config file should
+    not use flow mode.
+  - check the number of lines to be in the expected range.
+    A config file for ten configurable options probably
+    has a lower bound of ten and an upper bound not
+    beyond a magnitude bigger ( allowing for wrapped lines
+    and comment lines )
+- assuming you know that the resulting data should
+  have a maximum depth (i.e. `dict`s and `list`s
+  nested within each other), set that depth using
+  ```
+  yaml = ruamel.yaml.YAML()
+  yaml.max_depth = 42
+  ```
+  (Docker's `compose.yaml` files
+  seem to have a max_depth of only 4)
+
+
+## Acting on loaded data.
+
+YAML input, in particular using literal style block scalars loaded
+into multi-line strings, has been
+used to define snippets of code (e.g. shell scripts),
+in a readable way,
+to be executed as part of some configuration or build process.
+
+Just like the strings posted via an HTTP server,
+that are potentially abused for SQL injection,
+strings that are loaded from YAML scalars,
+and that are executed in one way or another,
+should be checked,
+especially when coming from unknown sources. 
+
+It is beyond `ruamel.yaml` capabilities, and responsibility,
+to check on, or prevent abuse of, such code snippets.
+
+## CVE
+
+There seems to be a CVE on `ruamel.yaml`, stating that the `load()` function could be abused 
+because of unchecked input. `load()` was never the default function (that was `round_trip_load()`
+before the new API came into existence. So the creator of that CVE was ill informed and
+probably lazily assumed that since `ruamel.yaml` is a derivative of PyYAML (for which
+a similar CVE exists), the same problem would still exist, without checking.
+
+So this CVE was always inappropriate, now just more so, as the call
+to the function `load()` with any input will terminate your program with an error message. If you 
+(have to) care about such things as this CVE, my recommendation is to stop using Python
+completely, as `pickle.load()` can be abused in the same way as `load()` (and like unlike `load()` 
+is only documented to be unsafe, without development-time warning. 
