@@ -881,7 +881,7 @@ def main():
             ('README.rst', 'text/x-rst'),
         ]:
             try:
-                kw['long_description'] = open(readme_file_name).read()
+                kw['long_description'] = open(readme_file_name, **open_kw).read()
                 kw['long_description_content_type'] = readme_markup_type
                 break
             except FileNotFoundError:
